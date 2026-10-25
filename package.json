@@ -1,0 +1,63 @@
+{
+  "name": "nexora-launcher",
+  "version": "1.3.0",
+  "description": "Nexora gaming platform launcher for Lignum Vitae",
+  "main": "main.js",
+  "author": "Lignum Vitae",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "37.2.0",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "com.nexora.launcher",
+    "productName": "Nexora",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "package.json",
+      "game-config.json",
+      "game/**/*"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false,
+      "verifyUpdateCodeSignature": false,
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Nexora",
+      "runAfterFinish": true
+    },
+    "extraResources": [
+      {
+        "from": "game/LignumVitae-Game.zip",
+        "to": "game/LignumVitae-Game.zip"
+      }
+    ]
+  },
+  "dependencies": {
+    "extract-zip": "^2.0.1"
+  }
+}

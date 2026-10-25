@@ -1,0 +1,6 @@
+{
+  "downloadUrl": "",
+  "note": "Otomatik oyun güncellemesi için updateManifestUrl alanına yayıncının HTTPS manifest adresini girin. Manifest örneği README_TR.txt dosyasındadır.",
+  "gameVersion": "1.0.0",
+  "updateManifestUrl": ""
+}
