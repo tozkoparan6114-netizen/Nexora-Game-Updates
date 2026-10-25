@@ -30,7 +30,9 @@ function bundledGameArchive(){
   return candidates.find(p => { try { return fs.statSync(p).isFile() && fs.statSync(p).size > 10000; } catch { return false; } }) || '';
 }
 
-let launcherWindow, gameWindow, tray = null;
+let launcherWindow, tray = null;
+// Allow several independent game windows (for testing or running multiple sessions).
+const gameWindows = new Set();
 let allowQuit = false;
 function showLauncher() {
   if (!launcherWindow || launcherWindow.isDestroyed()) createLauncher();
@@ -198,11 +200,14 @@ async function updateGame(){
   return {updated:true,message:`Oyun ${manifest.version} sürümüne güncellendi.`,path:result.path,size:result.size,version:manifest.version};
 }
 function openGameWindow(file){
-  if(gameWindow && !gameWindow.isDestroyed()){gameWindow.focus();return gameWindow;}
-  gameWindow = new BrowserWindow({width:1500,height:940,minWidth:960,minHeight:650,title:'Lignum Vitae',backgroundColor:'#10130f',autoHideMenuBar:true,webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:true}});
-  gameWindow.loadFile(file);
-  gameWindow.webContents.on('did-fail-load',(_e,code,desc)=>dialog.showErrorBox('Lignum Vitae',`Oyun yüklenemedi (${code}): ${desc}`));
-  gameWindow.on('closed',()=>{gameWindow=null;}); return gameWindow;
+  // Each press of OYNA opens a new independent game window instead of focusing
+  // the already-running session. Every window uses the installed game files.
+  const win = new BrowserWindow({width:1500,height:940,minWidth:960,minHeight:650,title:'Lignum Vitae',backgroundColor:'#10130f',autoHideMenuBar:true,webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:true}});
+  gameWindows.add(win);
+  win.loadFile(file);
+  win.webContents.on('did-fail-load',(_e,code,desc)=>dialog.showErrorBox('Lignum Vitae',`Oyun yüklenemedi (${code}): ${desc}`));
+  win.on('closed',()=>{gameWindows.delete(win);});
+  return win;
 }
 async function playGame(){
   let s=await status();
