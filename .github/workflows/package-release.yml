@@ -1,0 +1,36 @@
+name: Package game release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify game files exist
+        run: |
+          if [ ! -d "game" ] || [ -z "$(find game -type f -print -quit)" ]; then
+            echo "::error::No game files found. Add the actual game files to the game/ directory before publishing a release."
+            exit 1
+          fi
+
+      - name: Package game files
+        run: |
+          zip -r "Nexora-Game-${GITHUB_REF_NAME}.zip" game
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" "Nexora-Game-${GITHUB_REF_NAME}.zip" \
+            --title "Nexora Game ${GITHUB_REF_NAME}" \
+            --generate-notes
